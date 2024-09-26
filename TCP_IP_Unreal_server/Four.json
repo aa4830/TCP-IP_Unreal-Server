@@ -1,0 +1,6 @@
+{
+  "MyStruct": {
+    "Temperature": 65,
+    "State": "NotBad"
+  }
+}

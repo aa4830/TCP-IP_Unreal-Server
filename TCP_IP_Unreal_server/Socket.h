@@ -10,10 +10,7 @@ public:
 
 	void ListenForClients();
 	void SendData();
-	void SendJsonToClient(int clientSocket, const std::string& jsonString);
 	std::string ReadJsonFile(const std::string& filename);
-
-private:
 	SOCKET ServerSocket;
 	SOCKET ClientSocket;
 	struct sockaddr_in ServerSocketAddress;

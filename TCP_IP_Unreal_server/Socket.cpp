@@ -1,55 +1,81 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-#include "Socket.h"
-#include <WinSock2.h>
-#include "nlohmann/json.hpp"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <string>
- 
+#include <cstring>
+#include <WinSock2.h> // Windows 소켓 라이브러리 포함
+#include "Socket.h" // 사용자 정의 헤더 파일
+#include "nlohmann/json.hpp" // 외부 JSON 라이브러리
+
 #pragma comment(lib, "ws2_32")
 
-using json = nlohmann::json;
 using namespace std;
+using json = nlohmann::json;
 
-Socket::Socket()
+Socket::Socket() : ServerSocket(INVALID_SOCKET), ClientSocket(INVALID_SOCKET)
 {
-    std::srand(std::time(nullptr));
-
-    ServerSocket = INVALID_SOCKET;
-    ClientSocket = INVALID_SOCKET;
+    memset(&ServerSocketAddress, 0, sizeof(ServerSocketAddress));
+    memset(&ClientSocketAddress, 0, sizeof(ClientSocketAddress));
 
     WSAData wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        cout << "WSAStartup 실패: " << WSAGetLastError() << endl;
+        return; // 초기화 실패 시 종료
+    }
 
     ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (ServerSocket == INVALID_SOCKET)
+    {
+        cout << "소켓 생성 실패: " << WSAGetLastError() << endl;
+        WSACleanup();
+        return; // 소켓 생성 실패 시 종료
+    }
 
-    memset(&ServerSocketAddress, 0, sizeof(ServerSocketAddress));
     ServerSocketAddress.sin_family = AF_INET;
-    ServerSocketAddress.sin_addr.s_addr = inet_addr("192.168.0.108");
-    ServerSocketAddress.sin_port = htons(10880);
+    ServerSocketAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
+    ServerSocketAddress.sin_port = htons(10990);
 
-    bind(ServerSocket, (struct sockaddr*)&ServerSocketAddress, sizeof(ServerSocketAddress));
+    if (::bind(ServerSocket, (struct sockaddr*)&ServerSocketAddress, sizeof(ServerSocketAddress)) != 0)
+    {
+        cout << "bind 실패: " << WSAGetLastError() << endl;
+        closesocket(ServerSocket);
+        WSACleanup();
+        return; // bind 실패 시 종료
+    }
 
-    listen(ServerSocket, 5);
+    if (listen(ServerSocket, 5) == SOCKET_ERROR)
+    {
+        cout << "listen 실패: " << WSAGetLastError() << endl;
+        closesocket(ServerSocket);
+        WSACleanup();
+        return; // listen 실패 시 종료
+    }
 }
+
 
 Socket::~Socket()
 {
-    closesocket(ServerSocket);
-    closesocket(ClientSocket);
+    if (ClientSocket != INVALID_SOCKET)
+    {
+        closesocket(ClientSocket);
+    }
+    if (ServerSocket != INVALID_SOCKET)
+    {
+        closesocket(ServerSocket);
+    }
     WSACleanup();
 }
 
 void Socket::ListenForClients()
 {
-    memset(&ClientSocketAddress, 0, sizeof(ClientSocketAddress));
     int ClientSocketAddressSize = sizeof(ClientSocketAddress);
     ClientSocket = accept(ServerSocket, (struct sockaddr*)&ClientSocketAddress, &ClientSocketAddressSize);
-    if (ClientSocket < 0)
+    if (ClientSocket == INVALID_SOCKET)
     {
-        cout << "클라이언트 연결 실패" << endl;
+        cout << "클라이언트 연결 실패: " << WSAGetLastError() << endl;
         return;
     }
     else
@@ -58,32 +84,60 @@ void Socket::ListenForClients()
     }
 }
 
-void Socket::SendData()
+string Socket::ReadJsonFile(const std::string& filename)
 {
-    string jsonString = ReadJsonFile("Data.json");
-    SendJsonToClient(ClientSocket, jsonString);
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "파일 열기 오류: " << filename << endl;
+        return "{}"; // 빈 JSON 객체 반환
+    }
+    return string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 }
 
-void Socket::SendJsonToClient(int clientSocket, const std::string& jsonString)
+int GetRandomNumber(int min, int max)
 {
-    int result = send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
+    return rand() % (max - min + 1) + min;
+}
+
+void Socket::SendData()
+{
+    string jsonString;
+    int RandomValue = GetRandomNumber(1, 5);
+
+    switch (RandomValue)
+    {
+    case 1:
+        jsonString = ReadJsonFile("One.json");
+        break;
+    case 2:
+        jsonString = ReadJsonFile("Two.json");
+        break;
+    case 3:
+        jsonString = ReadJsonFile("Three.json");
+        break;
+    case 4:
+        jsonString = ReadJsonFile("Four.json");
+        break;
+    case 5:
+        jsonString = ReadJsonFile("Five.json");
+        break;
+    default:
+        cout << "Invalid value" << endl;
+        return; // 유효하지 않은 경우 함수 종료
+    }
+
+    if (jsonString.empty())
+    {
+        cout << "전송할 데이터가 없습니다." << endl;
+        return; // JSON 데이터가 비어있는 경우 함수 종료
+    }
+
+    int result = send(ClientSocket, jsonString.c_str(), static_cast<int>(jsonString.size()), 0);
     if (result == SOCKET_ERROR)
     {
         cout << "데이터 전송 실패: " << WSAGetLastError() << endl;
     }
-    else
-    {
+    else {
         cout << "데이터 전송 성공, 전송 바이트 수: " << result << endl;
     }
-}
-
-string Socket::ReadJsonFile(const std::string& filename)
-{
-    ifstream file(filename);
-    if (!file.is_open())
-    {
-        cout << "Error opening file: " << filename << endl;
-        return "{}"; // 빈 JSON 객체 반환
-    }
-    return string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 }
