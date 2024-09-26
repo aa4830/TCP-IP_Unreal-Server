@@ -1,6 +1,8 @@
 #include "Socket.h"
 #include <iostream>
 #include <string>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -10,16 +12,8 @@ int main()
     socket.ListenForClients();
     while (true)
     {
-        string command;
-        cout << "명령 입력 : ";
-        getline(cin, command);
-
-        if (command == "exit")
-        {
-            break;
-        }
-
-        socket.SendCommandMove(command);
+        socket.SendData();
+        this_thread::sleep_for(chrono::seconds(1));
     }
 
     return 0;

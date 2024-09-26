@@ -2,13 +2,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Socket.h"
 #include <WinSock2.h>
+#include "nlohmann/json.hpp"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <ctime>
-
 #include <string>
-
+ 
 #pragma comment(lib, "ws2_32")
 
 using json = nlohmann::json;
@@ -17,12 +16,6 @@ using namespace std;
 Socket::Socket()
 {
     std::srand(std::time(nullptr));
-
-    std::ifstream inputFile("C:\\Work\\TCP_IP_Unreal_Server\\data.json");
-    if (!inputFile.is_open()) {
-        std::cerr << "Failed to open JSON file." << std::endl;
-        return 1;
-    }
 
     ServerSocket = INVALID_SOCKET;
     ClientSocket = INVALID_SOCKET;
@@ -65,12 +58,32 @@ void Socket::ListenForClients()
     }
 }
 
-void Socket::SendCommandMove(const string& command)
+void Socket::SendData()
 {
-    int commandSize = static_cast<int>(command.size());
-    int Result = send(ClientSocket, command.c_str(), commandSize, 0);
-    if (Result != SOCKET_ERROR)
+    string jsonString = ReadJsonFile("Data.json");
+    SendJsonToClient(ClientSocket, jsonString);
+}
+
+void Socket::SendJsonToClient(int clientSocket, const std::string& jsonString)
+{
+    int result = send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
+    if (result == SOCKET_ERROR)
     {
-        cout << "명령 전송: " << command << endl;
+        cout << "데이터 전송 실패: " << WSAGetLastError() << endl;
     }
+    else
+    {
+        cout << "데이터 전송 성공, 전송 바이트 수: " << result << endl;
+    }
+}
+
+string Socket::ReadJsonFile(const std::string& filename)
+{
+    ifstream file(filename);
+    if (!file.is_open())
+    {
+        cout << "Error opening file: " << filename << endl;
+        return "{}"; // 빈 JSON 객체 반환
+    }
+    return string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 }

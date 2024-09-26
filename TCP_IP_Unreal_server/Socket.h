@@ -9,7 +9,9 @@ public:
 	~Socket();
 
 	void ListenForClients();
-	void SendCommandMove(const std::string& command);
+	void SendData();
+	void SendJsonToClient(int clientSocket, const std::string& jsonString);
+	std::string ReadJsonFile(const std::string& filename);
 
 private:
 	SOCKET ServerSocket;
