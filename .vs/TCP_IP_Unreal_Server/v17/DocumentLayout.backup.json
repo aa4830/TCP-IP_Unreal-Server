@@ -116,7 +116,7 @@
               "RelativeDocumentMoniker": "TCP_IP_Unreal_server\\Socket.cpp",
               "ToolTip": "C:\\Work\\TCP_IP_Unreal_Server\\TCP_IP_Unreal_server\\Socket.cpp",
               "RelativeToolTip": "TCP_IP_Unreal_server\\Socket.cpp",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAACkAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-09-19T08:30:03.985Z",
               "EditorCaption": ""
@@ -131,8 +131,7 @@
               "RelativeToolTip": "TCP_IP_Unreal_server\\Socket.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-09-19T08:29:46.651Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-19T08:29:46.651Z"
             },
             {
               "$type": "Document",
@@ -144,8 +143,7 @@
               "RelativeToolTip": "TCP_IP_Unreal_server\\main.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-09-19T08:29:29.422Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-19T08:29:29.422Z"
             }
           ]
         }
