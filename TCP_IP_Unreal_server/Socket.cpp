@@ -3,14 +3,30 @@
 #include "Socket.h"
 #include <WinSock2.h>
 #include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+
 #include <string>
 
 #pragma comment(lib, "ws2_32")
 
+using json = nlohmann::json;
 using namespace std;
 
-Socket::Socket() : ServerSocket(INVALID_SOCKET), ClientSocket(INVALID_SOCKET)
+Socket::Socket()
 {
+    std::srand(std::time(nullptr));
+
+    std::ifstream inputFile("C:\\Work\\TCP_IP_Unreal_Server\\data.json");
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open JSON file." << std::endl;
+        return 1;
+    }
+
+    ServerSocket = INVALID_SOCKET;
+    ClientSocket = INVALID_SOCKET;
+
     WSAData wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
