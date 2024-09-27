@@ -137,7 +137,8 @@ void Socket::SendData()
     {
         cout << "데이터 전송 실패: " << WSAGetLastError() << endl;
     }
-    else {
+    else 
+    {
         cout << "데이터 전송 성공, 전송 바이트 수: " << result << endl;
     }
 }
